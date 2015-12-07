@@ -127,7 +127,13 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 	return 0;
 }
 
-
+/**
+ * argv[0]:进程名
+ * argv[1]:注入的目标进程名称（包名）
+ * argv[2]:注入到目标进程的so路径
+ * argv[3]:注入so的执行函数
+ * argv[4]:注入so的执行函数参数
+ */
 int main(int argc, char** argv) {
 
 	pid_t target_pid;

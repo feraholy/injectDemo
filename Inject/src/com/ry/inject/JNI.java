@@ -49,14 +49,19 @@ public class JNI {
                 	 StringBuffer sb = new StringBuffer();
                 	 sb.append("su -c");
                 	 sb.append(" ").append(injectPath);//注入程序
-                	 sb.append(" ").append("com.ry.target");//目标进程名称
+                	 sb.append(" ").append("com.UCMobile");//目标进程名称
                 	 sb.append(" ").append(hookerPath);//注入代码so
                 	 sb.append(" ").append("hook_entry");//注入代码入口函数
                 	 sb.append(" ").append("hahaha");//注入代码入口函数参数
                 	 
                 	 commands[2] = sb.toString();
                 	 System.out.println(commands[2]);
-                	 ShellUtils.execCommand(commands, true);
+//                	 ShellUtils.execCommand(commands, true);
+                	 Runtime.getRuntime().exec(new String[]{
+                			 "su",
+                			 "-c",
+                			 injectPath + " com.UCMobile " + hookerPath + " hook_entry hahaha",
+                	 });
 
 				} catch (Exception e) {
 					e.printStackTrace();
