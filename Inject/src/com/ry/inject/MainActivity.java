@@ -2,6 +2,8 @@ package com.ry.inject;
 
 
 import com.ry.inject.service.FloatWindowService;
+
+import dalvik.system.PathClassLoader;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ public class MainActivity extends Activity  {
         // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
         startService(new Intent(this,FloatWindowService.class));
+        System.loadLibrary("hooker");
         this.finish();
     }
 }

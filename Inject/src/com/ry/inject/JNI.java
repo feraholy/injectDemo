@@ -43,6 +43,8 @@ public class JNI {
                 	
                 	 commands[0] = "chmod 777 " + injectPath;
                 	 commands[1] = "chmod 777 " + hookerPath;
+                	 Runtime.getRuntime().exec(commands[0]);
+                	 Runtime.getRuntime().exec(commands[1]);
 //                	 commands[2] = "chmod 777 " + substratePath;
 //                	 commands[3] = "chmod 777 " + TARGET_PATH;
                 	 

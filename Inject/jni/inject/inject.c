@@ -112,13 +112,13 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 
 	//8.调用dlclose卸载注入so
 	//函数原型:int dlclose(void *handle);
-	void *target_dlclose_addr = get_remote_func_address(target_pid, linker_path, (void *) dlclose);
-	parameters[0] = target_so_handle;
-
-	if (ptrace_call_wrapper(target_pid, "dlclose", target_dlclose_addr, parameters, 1,&regs) < -1) {
-		LOGD("call target dlclose error");
-		return -1;
-	}
+//	void *target_dlclose_addr = get_remote_func_address(target_pid, linker_path, (void *) dlclose);
+//	parameters[0] = target_so_handle;
+//
+//	if (ptrace_call_wrapper(target_pid, "dlclose", target_dlclose_addr, parameters, 1,&regs) < -1) {
+//		LOGD("call target dlclose error");
+//		return -1;
+//	}
 	//9.恢复现场
 	ptrace_setregs(target_pid, &original_regs);
 	//10.detach
@@ -137,6 +137,10 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 int main(int argc, char** argv) {
 
 	pid_t target_pid;
+	int i=0;
+	for(i=0; i<argc; i++){
+		LOGD("%d: %s\n", i,argv[i]);
+	}
 	target_pid = find_pid_of(argv[1]);
 	if (-1 == target_pid) {
 		LOGD("Can't find the process\n");
