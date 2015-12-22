@@ -48,10 +48,11 @@ public class JNI {
 //                	 commands[2] = "chmod 777 " + substratePath;
 //                	 commands[3] = "chmod 777 " + TARGET_PATH;
                 	 
+                	 final String pack = "com.android.vending";
                 	 StringBuffer sb = new StringBuffer();
                 	 sb.append("su -c");
                 	 sb.append(" ").append(injectPath);//注入程序
-                	 sb.append(" ").append("com.UCMobile");//目标进程名称
+                	 sb.append(" ").append(pack);//目标进程名称
                 	 sb.append(" ").append(hookerPath);//注入代码so
                 	 sb.append(" ").append("hook_entry");//注入代码入口函数
                 	 sb.append(" ").append("hahaha");//注入代码入口函数参数
@@ -62,7 +63,7 @@ public class JNI {
                 	 Runtime.getRuntime().exec(new String[]{
                 			 "su",
                 			 "-c",
-                			 injectPath + " com.UCMobile " + hookerPath + " hook_entry hahaha",
+                			 injectPath + " "+pack+" " + hookerPath + " hook_entry hahaha",
                 	 });
 
 				} catch (Exception e) {
