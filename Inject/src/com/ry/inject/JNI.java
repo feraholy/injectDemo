@@ -48,7 +48,8 @@ public class JNI {
 //                	 commands[2] = "chmod 777 " + substratePath;
 //                	 commands[3] = "chmod 777 " + TARGET_PATH;
                 	 
-                	 final String pack = "com.android.vending";
+                	 final String pack = "com.android.vending";//GP市场
+//                	 final String pack = "com.google.android.gsf.login";//GP登录
                 	 StringBuffer sb = new StringBuffer();
                 	 sb.append("su -c");
                 	 sb.append(" ").append(injectPath);//注入程序
