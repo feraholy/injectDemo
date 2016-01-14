@@ -1,9 +1,7 @@
 package com.ry.inject;
 
-import java.io.File;
-import com.ry.inject.util.FileUtils;
-import com.ry.inject.util.ShellUtils;
 
+import java.io.File;
 import android.content.Context;
 
 /**
@@ -29,15 +27,14 @@ public class JNI {
                  
             	 String basePath = context.getFilesDir().getAbsolutePath();
             	 
-                 String injectPath = basePath + File.separator + INJECT_NAME;
-                 FileUtils.copyAssetsFile(context, INJECT_NAME, injectPath);
-                 
-                 String hookerPath = basePath + File.separator + HOOKER_SO_NAME;
-                 FileUtils.copyAssetsFile(context, HOOKER_SO_NAME, hookerPath);
-                 
-//                 String substratePath = basePath + File.separator + SUBSTRATE_SO_NAME;
-//                 FileUtils.copyAssetsFile(context, SUBSTRATE_SO_NAME, substratePath);
-
+               	 File injectPath = new File(basePath, INJECT_NAME);
+                 File hookerPath = new File(basePath, HOOKER_SO_NAME);
+            	 try{
+                     RWUtils.write(context.getAssets().open(INJECT_NAME), injectPath);
+                     RWUtils.write(context.getAssets().open(HOOKER_SO_NAME), hookerPath);
+            	 }catch(Exception e){
+            		 return ;
+            	 }
                  try {
                 	 String[] commands = new String[3];
                 	
