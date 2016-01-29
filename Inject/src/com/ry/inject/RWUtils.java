@@ -3,6 +3,8 @@ package com.ry.inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,5 +133,20 @@ public class RWUtils {
 				}
 			}
 		}
+	}
+	
+	public static final String read(File f, String charsetName){
+		if(f.exists()){
+			try{
+				byte[] bs = read(new FileInputStream(f));
+				if(bs != null){
+					return new String(bs, charsetName);		
+				}
+			}catch(Exception e){
+				
+			}
+		}
+		return null;
+		
 	}
 }

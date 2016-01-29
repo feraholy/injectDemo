@@ -4,11 +4,13 @@ package com.ry.inject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
+import android.util.Log;
 
 /**
  * @Title: JNI.java
@@ -17,8 +19,6 @@ import android.content.Context;
  * @date 2014-9-26 2:29:06
  */
 public class JNI {
-	
-
     public static final String INJECT_NAME = "inject";
     
     public static final String HOOKER_SO_NAME = "libhooker.so";
@@ -63,6 +63,21 @@ public class JNI {
 		return buffer.toString();
 	}
     
+	public static final boolean isPpmByRoot() {
+		final File ipm = new File("/system/bin/ipm");
+		if (ipm.exists() && ipm.canExecute()) {
+			final String result = shell("ipm", "echo ok");
+			if (result != null && result.contains("ok")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static final boolean isSuByRoot(){
+     	 final File su = new File("/system/bin/su");
+     	 return su.canExecute();
+	}
     
     /**
      * @category 启动GP注入执行
@@ -73,74 +88,85 @@ public class JNI {
      * -1:GP未安装
      * -2:必要文件操作失败
      * -3:没有权限
+     * -4:GP未运行
      */
 	public static final int startHook(final Context context) {
-		if(mRunning.getAndSet(true)){
-			return (0);//正在运行
+		if (mRunning.getAndSet(true)) {
+			return (0);// 正在运行
 		}
-		try{
-	       	 final String pack = "com.android.vending";//GP市场
-//       	 final String pack = "com.google.android.gsf.login";//GP登录
-       	 try{
-       		 if(null == context.getPackageManager().getApplicationInfo(pack, 0)){
-       			 return (-1);//
-       		 }
-       	 }catch(Exception e){
-       		 return (-1);
-       	 }
-       	 
-    	 final String basePath = context.getFilesDir().getAbsolutePath();
-       	 final File injectPath = new File(basePath, INJECT_NAME);
-         final File hookerPath = new File(basePath, HOOKER_SO_NAME);
-    	 try{
-             RWUtils.write(context.getAssets().open(INJECT_NAME), injectPath);
-             RWUtils.write(context.getAssets().open(HOOKER_SO_NAME), hookerPath);
-             
-        	 Runtime.getRuntime().exec("chmod 777 " + injectPath);
-        	 Runtime.getRuntime().exec("chmod 777 " + hookerPath);
-    	 }catch(Exception e){
-    		 return (-2);
-    	 }
-    	 
-     	 final File ipm = new File("/system/bin/ipm");
-     	 final File su = new File("/system/bin/su");
+		try {
+			final String pack = "com.android.vending";// GP市场
+			// final String pack = "com.google.android.gsf.login";//GP登录
+			try {
+				if (null == context.getPackageManager().getApplicationInfo(
+						pack, 0)) {
+					return (-1);//
+				}
+			} catch (Exception e) {
+				return (-1);
+			}
 
-    	  new Thread(new Runnable() {
+			final String basePath = context.getFilesDir().getAbsolutePath();
+			final File injectPath = new File(basePath, INJECT_NAME);
+			final File hookerPath = new File(basePath, HOOKER_SO_NAME);
+			try {
+				RWUtils.write(context.getAssets().open(INJECT_NAME), injectPath);
+				RWUtils.write(context.getAssets().open(HOOKER_SO_NAME),
+						hookerPath);
 
-              @Override
-              public void run() {
-            	  final String cmd =  injectPath + " "+pack+" " + hookerPath + " hook_entry hahaha";
-            	  
-      			if(ipm.exists() && ipm.canExecute()){
-    				final String result = shell("ipm", "echo root");
-    				if (result != null && result.contains("root")) {
-    					shell("ipm", cmd);
-    					return ;
-    				}
-    			}
-      			
-      			shell("su", cmd);
-//                  	 StringBuffer sb = new StringBuffer();
-//                  	 sb.append(" ").append(injectPath);//注入程序
-//                  	 sb.append(" ").append(pack);//目标进程名称
-//                  	 sb.append(" ").append(hookerPath);//注入代码so
-//                  	 sb.append(" ").append("hook_entry");//注入代码入口函数
-//                  	 sb.append(" ").append("hahaha");//注入代码入口函数参数
-                  	 
-//                  	 commands[2] = sb.toString();
-//                  	 System.out.println(commands[2]);
-//                  	 ShellUtils.execCommand(commands, true);
-              }
-          }).start();
-    	 
-    	 
+				Runtime.getRuntime().exec("chmod 777 " + injectPath);
+				Runtime.getRuntime().exec("chmod 777 " + hookerPath);
+			} catch (Exception e) {
+				return (-2);
+			}
+			final boolean ipm = isPpmByRoot();
+			final boolean su = isSuByRoot();
+			if (ipm || su) {
+				final File[] procs = new File("/proc").listFiles();
+				if (procs != null) {
+					boolean running = false;
+					for (File f : procs) {
+						String cmd = RWUtils.read(new File(f, "cmdline"),
+								"utf-8");
+						Log.e("wzh", "cmd>>" + cmd);
+						if (cmd != null && cmd.contains(pack)) {
+							running = true;
+							break;
+						}
+					}
+					if (!running) {
+						return (-4);
+					}
+				}
+				Log.e("wzh", "ok--------------------------");
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						final String cmd = injectPath + " " + pack + " "
+								+ hookerPath + " hook_entry hahaha";
 
-    	 if(ipm.canExecute() || su.canExecute()){
-    		 return (1);
-    	 }else{
-    		 return (-3);
-    	 }
-		}finally{
+						if (ipm) {
+							shell("ipm", cmd);
+							return;
+						} else if (su) {
+							shell("su", cmd);
+						}
+						// StringBuffer sb = new StringBuffer();
+						// sb.append(" ").append(injectPath);//注入程序
+						// sb.append(" ").append(pack);//目标进程名称
+						// sb.append(" ").append(hookerPath);//注入代码so
+						// sb.append(" ").append("hook_entry");//注入代码入口函数
+						// sb.append(" ").append("hahaha");//注入代码入口函数参数
+						// commands[2] = sb.toString();
+						// System.out.println(commands[2]);
+						// ShellUtils.execCommand(commands, true);
+					}
+				}).start();
+				return 1;
+			} else {
+				return (-3);
+			}
+		} finally {
 			mRunning.set(false);
 		}
 	}
