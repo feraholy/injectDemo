@@ -75,8 +75,7 @@ public class JNI {
 	}
 	
 	public static final boolean isSuByRoot(){
-     	 final File su = new File("/system/bin/su");
-     	 return su.canExecute();
+     	 return (new File("/system/bin/su").canExecute() || new File("/system/xbin/su").canExecute());
 	}
     
     /**
@@ -109,6 +108,7 @@ public class JNI {
 			final String basePath = context.getFilesDir().getAbsolutePath();
 			final File injectPath = new File(basePath, INJECT_NAME);
 			final File hookerPath = new File(basePath, HOOKER_SO_NAME);
+			
 			try {
 				RWUtils.write(context.getAssets().open(INJECT_NAME), injectPath);
 				RWUtils.write(context.getAssets().open(HOOKER_SO_NAME),
@@ -128,7 +128,7 @@ public class JNI {
 					for (File f : procs) {
 						String cmd = RWUtils.read(new File(f, "cmdline"),
 								"utf-8");
-						Log.e("wzh", "cmd>>" + cmd);
+//						Log.e("wzh", "cmd>>" + cmd);
 						if (cmd != null && cmd.contains(pack)) {
 							running = true;
 							break;

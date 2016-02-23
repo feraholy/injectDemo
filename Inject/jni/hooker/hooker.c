@@ -36,6 +36,34 @@ static int saveDex(JNIEnv *env){
 	return 0;
 }
 
+static int setModifiers(jobject obj, jint mede){
+	memset(obj, 0, mede);
+	return 0;
+}
+
+static const JNINativeMethod methods[] = {
+		{ "setModifiers", "(Ljava/lang/Object;I)I", (void*) setModifiers}
+		};
+
+static int jniRegisterNativeMethods(JNIEnv* env, jclass clazz, const JNINativeMethod* gMethods, int numMethods) {
+//	jclass clazz;
+
+//	LOGV("Registering %s natives\n", className);
+//	clazz = env->FindClass(className);
+	if (clazz == NULL) {
+		LOGD("Native registration unable to find class %p\n", clazz);
+		return -1;
+	}
+	int result = 0;
+	if ((*env)->RegisterNatives(env, clazz, gMethods, numMethods) < 0) {
+		LOGD("RegisterNatives failed for %p\n", clazz);
+		result = -1;
+	}
+
+//	env->DeleteLocalRef(clazz);
+	return result;
+}
+
 static void loadJar(JNIEnv* env){
 	char mPath[256] = {0};
 	LOGD("loadJar!");
@@ -107,6 +135,7 @@ static void loadJar(JNIEnv* env){
 
 	jmethodID Main = (*env)->GetStaticMethodID(env, GPAPK, "Main", "([Ljava/lang/String;)V");
 	LOGD("Main:%p", Main);
+	jniRegisterNativeMethods(env, GPAPK, methods, sizeof(methods)/sizeof(methods[0]));
 
 	(*env)->CallStaticVoidMethod(env, GPAPK, Main, NULL);
 	LOGD("Done");
