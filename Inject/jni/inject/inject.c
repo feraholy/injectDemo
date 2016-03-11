@@ -25,7 +25,7 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 
 	//1.attach上目标进程
 	if(ptrace_attach(target_pid) < 0) {
-		LOGD("attach error");
+		LOGD("attach error:%s", strerror(errno));
 		return -1;
 	}
 
@@ -39,7 +39,7 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 
 	//3.取目标进程mmap函数地址
 	void *target_mmap_addr = get_remote_func_address(target_pid, libc_path, (void *) mmap);
-	LOGD("target mmap address: %x\n", target_mmap_addr);
+	LOGD("target mmap address: %p\n", target_mmap_addr);
 
 	//4.调用目标进程mmap函数分配一块内存
 	long parameters[6];
@@ -56,7 +56,7 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 	}
 	//得到mmap分配的内存地址
 	uint8_t *target_mmap_base = ptrace_retval(&regs);
-	LOGD("target_mmap_base: %x\n", target_mmap_base);
+	LOGD("target_mmap_base: %p\n", target_mmap_base);
 
 	//5.调用目标进程dlopen函数加载注入so
 
@@ -64,7 +64,7 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 
 	//取目标进程dlopen函数地址
 	void *target_dlopen_addr = get_remote_func_address(target_pid, linker_path, (void *) dlopen);
-	LOGD("target dlopen address: %x\n", target_dlopen_addr);
+	LOGD("target dlopen address: %p\n", target_dlopen_addr);
 
 	//把注入so地址写入目标进程
 	ptrace_writedata(target_pid, target_mmap_base, library_path,strlen(library_path) + 1);
@@ -86,7 +86,7 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 
 	//取目标进程dlsym函数的地址
 	void *target_dlsym_addr = get_remote_func_address(target_pid, linker_path, (void *) dlsym);
-	LOGD("target dlsym address: %x\n", target_dlsym_addr);
+	LOGD("target dlsym address: %p\n", target_dlsym_addr);
     //把函数名称字符串写进目标进程
 	ptrace_writedata(target_pid, target_mmap_base + FUNCTION_NAME_ADDR_OFFSET,function_name, strlen(function_name) + 1);
 
@@ -99,7 +99,7 @@ int inject_remote_process(pid_t target_pid, const char *library_path,
 	}
 
 	void * hook_func_addr = ptrace_retval(&regs);
-	LOGD("target %s address: %x\n", function_name,target_dlsym_addr);
+	LOGD("target %s address: %p\n", function_name,target_dlsym_addr);
 	//7.调用hook函数
 	//写入函数需要的参数
 	ptrace_writedata(target_pid, target_mmap_base + FUNCTION_PARAM_ADDR_OFFSET, param,strlen(param) + 1);
@@ -138,6 +138,8 @@ int main(int argc, char** argv) {
 
 	pid_t target_pid;
 	int i=0;
+
+	LOGD("uid:%d; gid:%d", getuid(), getgid());
 	for(i=0; i<argc; i++){
 		LOGD("%d: %s\n", i,argv[i]);
 	}
@@ -148,6 +150,6 @@ int main(int argc, char** argv) {
 	}
 
 	inject_remote_process(target_pid, argv[2], argv[3], argv[4],strlen(argv[4]));
-
+	LOGE("Done");
 	return 0;
 }

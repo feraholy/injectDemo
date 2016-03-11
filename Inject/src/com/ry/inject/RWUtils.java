@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public class RWUtils {
 	
@@ -148,5 +149,16 @@ public class RWUtils {
 		}
 		return null;
 		
+	}
+	
+	public static final InputStream openStream(ClassLoader loader, String resName) throws IOException{
+		URL url = null;
+		while(loader != null){
+			if(null != (url = loader.getResource(resName))){
+				break;
+			}
+			loader = loader.getParent();
+		}
+		return (url == null ? null : url.openStream());
 	}
 }

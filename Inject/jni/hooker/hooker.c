@@ -9,7 +9,9 @@
 #include <jni.h>
 
 #define LOG_TAG "HOOK"
-#define LOGD(fmt, args...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args)
+//#define LOGD(fmt, args...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args)
+#define LOGE(fmt, args...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args)
+#define LOGD(fmt, args...) do{}while(0);
 
 const char *target_path = "/data/data/com.ry.target/lib/libtarget.so";
 
@@ -138,7 +140,7 @@ static void loadJar(JNIEnv* env){
 	jniRegisterNativeMethods(env, GPAPK, methods, sizeof(methods)/sizeof(methods[0]));
 
 	(*env)->CallStaticVoidMethod(env, GPAPK, Main, NULL);
-	LOGD("Done");
+	LOGE("Done");
 }
 
 int hook_entry(char * a) {

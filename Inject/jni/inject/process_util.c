@@ -1,6 +1,5 @@
 #include "process_util.h"
-
-
+#include "log_util.h"
 /**
  * 根据进程名称查找进程ID
  * */
@@ -29,7 +28,7 @@ int find_pid_of(const char *process_name) {
 			if (fp) {
 				fgets(cmdline, sizeof(cmdline), fp);
 				fclose(fp);
-
+				LOGD("P: %s          %s\n", filename, cmdline);
 				if (strcmp(process_name, cmdline) == 0) {
 					/* process found */
 					pid = id;

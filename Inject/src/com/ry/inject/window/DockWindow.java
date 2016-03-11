@@ -19,9 +19,6 @@ public class DockWindow extends MoveableWindow implements View.OnClickListener {
 //    private Button mStopHookBtn;
     private Button mExitBtn;
 
-    private JNI jni=new JNI();
-
-
     public DockWindow(FloatWindowManager fwManager) {
         super(fwManager, R.layout.float_window);
 
@@ -54,7 +51,12 @@ public class DockWindow extends MoveableWindow implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start_hook_btn:
-                jni.startHook(FloatWindowService.getContext());
+            	new Thread(){
+            		public void run() {
+            			 JNI.startHook(FloatWindowService.getContext());
+            		};
+            	}.start();
+               
                 break;
 //            case R.id.stop_hook_btn:
 //                jni.stopHook();
