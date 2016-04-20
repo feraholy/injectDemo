@@ -4,6 +4,7 @@ import com.ry.inject.JNI;
 import com.ry.inject.R;
 import com.ry.inject.service.FloatWindowService;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -53,7 +54,8 @@ public class DockWindow extends MoveableWindow implements View.OnClickListener {
             case R.id.start_hook_btn:
             	new Thread(){
             		public void run() {
-            			 JNI.startHook(FloatWindowService.getContext());
+            			 int a = JNI.startHook(FloatWindowService.getContext());
+            			 Log.e("wzh", "startHook="+a);
             		};
             	}.start();
                
