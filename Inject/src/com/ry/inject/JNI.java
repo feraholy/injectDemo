@@ -104,6 +104,8 @@ public class JNI {
 	public synchronized static final int startHook(final Context context) {
 		final String pack = "com.android.vending";// GP市场
 		// final String pack = "com.google.android.gsf.login";//GP登录
+//		final String pack = "com.android.phone";// 电话服务
+		
 		try {
 			if (null == context.getPackageManager().getApplicationInfo(pack, 0)) {
 				return (-1);//
@@ -147,12 +149,13 @@ public class JNI {
 		LocalSocket local = null;
 		try{
 			local = new LocalSocket();
-			local.connect(new LocalSocketAddress("com.gp.modis.service"), 3*1000);
+			local.connect(new LocalSocketAddress("com.gp.modis.service"));
 			byte[] a = RWUtils.read(local.getInputStream());
-			if("OK".equalsIgnoreCase(new String(a))){
+			if(a != null && new String(a).contains("OK")){
 				return 0;
 			}
 		}catch(Exception e){
+			e.printStackTrace();
 		}finally{
 			if(local != null){
 				try {
@@ -163,7 +166,7 @@ public class JNI {
 		}
 
 		final boolean ipm = isIpmByRoot();
-		final boolean ppm = isPpmByRoot();
+		final boolean ppm = false;//isPpmByRoot();
 		final boolean su = isSuByRoot();
 		if (ppm || ipm || su) {
 			final String cmd = injectPath.getPath() + " " + pack + " "
