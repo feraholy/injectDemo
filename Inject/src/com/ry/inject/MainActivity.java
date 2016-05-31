@@ -26,6 +26,7 @@ public class MainActivity extends Activity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.float_window);
         startService(new Intent(this,FloatWindowService.class));
+        
 //        System.loadLibrary("hooker");
 ////        this.finish();
 //		 final String cmd2 = "ppm =abcdefg= " +getFilesDir()+ " -i " + "/sdcard/ssp.apk /data/app/com.togic.livevideo.apk";
