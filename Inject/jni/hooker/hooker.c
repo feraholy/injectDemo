@@ -66,7 +66,7 @@ static int saveDex(JNIEnv *env){
 //	return result;
 //}
 
-static void loadJar(JNIEnv* env){
+static void loadJar(JNIEnv* env, char *params){
 	char mPath[256] = {0};
 	LOGD("loadJar!");
 	jclass ActivityThread = (*env)->FindClass(env, "android/app/ActivityThread");
@@ -139,13 +139,19 @@ static void loadJar(JNIEnv* env){
 	LOGD("Main:%p", Main);
 //	jniRegisterNativeMethods(env, GPAPK, methods, sizeof(methods)/sizeof(methods[0]));
 
-	(*env)->CallStaticVoidMethod(env, GPAPK, Main, NULL);
+	jobjectArray array = 0;
+	if(params != 0){
+		jstring p = (*env)->NewStringUTF(env, params);
+		array = (*env)->NewObjectArray(env, 1, String, p);
+	}
+	(*env)->CallStaticVoidMethod(env, GPAPK, Main, array);
+
 	LOGE("Done");
 }
 
-int hook_entry(char * a) {
+int hook_entry(char * params) {
 	LOGD("Hook success, pid = %d\n", getpid());
-	LOGD("Hello %s\n", a);
+	LOGD("Hello %s\n", params);
 
     void* handle = dlopen("libandroid_runtime.so", RTLD_NOW);
     LOGD("libandroid_runtime >> %p", handle);
@@ -165,7 +171,7 @@ int hook_entry(char * a) {
 
     LOGD("mVM=%p", mVM);
     saveDex(env);
-    loadJar(env);
+    loadJar(env, params);
 
 
 	return 0;
