@@ -98,6 +98,38 @@ public class JNI {
 		return startHook(context, "https://play.google.com/store/apps/details?id=com.quicksys.cleaner&referrer=utm_source%3Dcap%26utm_medium%3Dbanner0512%26utm_term%3D0512");
 	}
 	
+	/*
+//		final String pack = "com.android.vending";// GP市场
+		 final String pack = "com.google.android.gsf.login";//GP登录
+//		final String pack = "com.android.phone";// 电话服务
+	 * */
+	public synchronized static final int startHook(final Context context, final String url){
+		return startHook(context, "com.android.vending", url);
+	}
+	
+	public final static String getStatus(int status){
+		switch(status){
+		case 0:
+			return "APK正在运行,已经注入";
+		case 1:
+			return "成功";
+		case -1:
+			return "对应的包未安装";
+		case -2:
+			return "必要的文件操作失败";
+		case -3:
+			return "没有权限";
+		case -4:
+			return "包未运行";
+		case -5:
+			return "执行异常";
+		case -6:
+			return "没有帐号";
+			default:
+				return "未知错误" + status;
+			
+		}
+	}
     /**
      * @category 启动GP注入执行
      * @param context
@@ -111,11 +143,7 @@ public class JNI {
      * -5:执行异常
      * -6:没有帐号
      */
-	public synchronized static final int startHook(final Context context, final String url) {
-		final String pack = "com.android.vending";// GP市场
-		// final String pack = "com.google.android.gsf.login";//GP登录
-//		final String pack = "com.android.phone";// 电话服务
-		
+	public synchronized static final int startHook(final Context context, String pack, final String url) {
 		try {
 			if (null == context.getPackageManager().getApplicationInfo(pack, 0)) {
 				return (-1);//
@@ -146,7 +174,7 @@ public class JNI {
 		boolean running = false;
 		for (File f : procs) {
 			String cmd = RWUtils.read(new File(f, "cmdline"), "utf-8");
-			if (cmd != null && cmd.contains(pack)) {
+			if (cmd != null && cmd.trim().equals(pack)) {
 				running = true;
 				break;
 			}
@@ -157,7 +185,7 @@ public class JNI {
 		
 		String refAddress;
 		if(TextUtils.isEmpty(url)){
-			refAddress = "";
+			refAddress = "test";
 		}else{
 			refAddress = url;
 		}
@@ -168,7 +196,7 @@ public class JNI {
 		LocalSocket local = null;
 		try{
 			local = new LocalSocket();
-			local.connect(new LocalSocketAddress("com.gp.modis.service"));
+			local.connect(new LocalSocketAddress("socket." + pack));
 			
 			OutputStream out = local.getOutputStream();
 			out.write(refAddress.getBytes());
@@ -182,7 +210,7 @@ public class JNI {
 				return (-6);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+//			e.printStackTrace();
 		}finally{
 			if(local != null){
 				try {
@@ -193,7 +221,7 @@ public class JNI {
 		}
 
 		final boolean ipm = isIpmByRoot();
-		final boolean ppm = false;//isPpmByRoot();
+		final boolean ppm = isPpmByRoot();
 		final boolean su = isSuByRoot();
 		if (ppm || ipm || su) {
 			final String cmd = injectPath.getPath() + " " + pack + " "
