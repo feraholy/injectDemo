@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <asm/user.h>
+#include <sys/user.h>
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>

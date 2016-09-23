@@ -23,7 +23,7 @@ int ptrace_readdata(pid_t pid, const uint8_t *src, const uint8_t *buf, size_t si
 
     j = size / 4;
     remain = size % 4;
-    laddr = buf;
+    laddr = (uint8_t *)buf;
 	
     for (i = 0; i < j; i ++) {
         d.val = ptrace(PTRACE_PEEKTEXT, pid, src, 0);

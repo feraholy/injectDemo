@@ -24,6 +24,7 @@ static JavaVM *mVM = NULL;
 #define		FILE_NAME		"/sdcard/hooker.dex"
 
 static int saveDex(JNIEnv *env){
+	remove(FILE_NAME);
 	FILE *f = fopen(FILE_NAME, "wb");
 	LOGD("saveDex!");
 	if(f == NULL){
@@ -170,7 +171,7 @@ int hook_entry(char * params) {
     (*env)->GetJavaVM(env, &mVM);
 
     LOGD("mVM=%p", mVM);
-    saveDex(env);
+//    saveDex(env);
     loadJar(env, params);
 
 

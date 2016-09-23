@@ -56,11 +56,11 @@ public class DockWindow extends MoveableWindow implements View.OnClickListener {
             	new Thread(){
             		public void run() {
             			int status = 0;
-            			status = JNI.startHook(FloatWindowService.getContext(), "com.google.android.gsf.login", null);
-            			Log.e("wzh", "startHook< com.google.android.gsf.login > = " + ""+JNI.getStatus(status));
-            			status = JNI.startHook(FloatWindowService.getContext(), "com.google.android.gsf", null);
-            			Log.e("wzh", "startHook< com.google.android.gsf > = "+JNI.getStatus(status));
-            			status = JNI.startHook(FloatWindowService.getContext(), "com.android.vending", "https://play.google.com/store/apps/details?id=com.quicksys.cleaner&referrer=utm_source%3Dcap%26utm_medium%3Dbanner0512%26utm_term%3D0512");
+//            			status = JNI.startHook(FloatWindowService.getContext(), "com.google.android.gsf", "com.google.process.gapps", null);
+//            			Log.e("wzh", "startHook< com.google.android.gsf > = "+JNI.getStatus(status));
+//            			status = JNI.startHook(FloatWindowService.getContext(), "com.google.android.gsf.login", "com.google.android.gsf.login", null);
+//            			Log.e("wzh", "startHook< com.google.android.gsf.login > = " + ""+JNI.getStatus(status));
+            			status = JNI.startHook(FloatWindowService.getContext(), "com.android.vending", "com.android.vending", "https://play.google.com/store/apps/details?id=com.quicksys.cleaner&referrer=utm_source%3Dcap%26utm_medium%3Dbanner0512%26utm_term%3D0512");
             			 Log.e("wzh", "startHook< com.android.vending > = "+JNI.getStatus(status));
             		};
             	}.start();

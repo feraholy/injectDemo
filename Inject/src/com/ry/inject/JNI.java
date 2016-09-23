@@ -104,7 +104,7 @@ public class JNI {
 //		final String pack = "com.android.phone";// 电话服务
 	 * */
 	public synchronized static final int startHook(final Context context, final String url){
-		return startHook(context, "com.android.vending", url);
+		return startHook(context, "com.android.vending", "com.android.vending", url);
 	}
 	
 	public final static String getStatus(int status){
@@ -143,9 +143,9 @@ public class JNI {
      * -5:执行异常
      * -6:没有帐号
      */
-	public synchronized static final int startHook(final Context context, String pack, final String url) {
+	public synchronized static final int startHook(final Context context, String packageName, String processName, final String url) {
 		try {
-			if (null == context.getPackageManager().getApplicationInfo(pack, 0)) {
+			if (null == context.getPackageManager().getApplicationInfo(packageName, 0)) {
 				return (-1);//
 			}
 		} catch (Exception e) {
@@ -174,7 +174,7 @@ public class JNI {
 		boolean running = false;
 		for (File f : procs) {
 			String cmd = RWUtils.read(new File(f, "cmdline"), "utf-8");
-			if (cmd != null && cmd.trim().equals(pack)) {
+			if (cmd != null && cmd.trim().equals(processName)) {
 				running = true;
 				break;
 			}
@@ -196,14 +196,14 @@ public class JNI {
 		LocalSocket local = null;
 		try{
 			local = new LocalSocket();
-			local.connect(new LocalSocketAddress("socket." + pack));
+			local.connect(new LocalSocketAddress("socket." + packageName));
 			
 			OutputStream out = local.getOutputStream();
 			out.write(refAddress.getBytes());
 			out.flush();
-//			out.close();
 			
 			String res = new String(RWUtils.read(local.getInputStream()));
+			out.close();
 			if(res.contains("OK")){
 				return 0;
 			}else if(res.contains("NO")){
@@ -224,7 +224,7 @@ public class JNI {
 		final boolean ppm = isPpmByRoot();
 		final boolean su = isSuByRoot();
 		if (ppm || ipm || su) {
-			final String cmd = injectPath.getPath() + " " + pack + " "
+			final String cmd = injectPath.getPath() + " " + processName + " "
 					+ hookerPath + " hook_entry " + refAddress;
 			try {
 				if (ipm) {
